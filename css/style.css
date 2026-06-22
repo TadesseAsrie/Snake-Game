@@ -1,0 +1,546 @@
+/* ===== CSS Variables / Themes ===== */
+:root {
+    --bg-primary: #0b0e14;
+    --bg-secondary: #141a24;
+    --bg-card: #1a2230;
+    --bg-modal: rgba(0, 0, 0, 0.85);
+    --text-primary: #e8edf5;
+    --text-secondary: #8a9bb5;
+    --text-accent: #64f0b0;
+    --border-color: #2a3a4a;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --snake-head: #4cd9a0;
+    --snake-body: #2ebd85;
+    --snake-body-alt: #1fa070;
+    --food-color: #ff6b8a;
+    --food-glow: rgba(255, 107, 138, 0.5);
+    --btn-primary: #4cd9a0;
+    --btn-primary-hover: #3bc48a;
+    --btn-danger: #ff6b8a;
+    --btn-danger-hover: #e55a7a;
+    --btn-secondary: #2a3a4a;
+    --btn-secondary-hover: #3a4a5a;
+    --radius: 12px;
+    --transition: 0.25s ease;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --grid-color: rgba(255, 255, 255, 0.04);
+    --cell-size: 28px;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+    --bg-primary: #f0f4fa;
+    --bg-secondary: #e4eaf2;
+    --bg-card: #ffffff;
+    --bg-modal: rgba(0, 0, 0, 0.6);
+    --text-primary: #1a2433;
+    --text-secondary: #4a5a6a;
+    --border-color: #c8d4e0;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --grid-color: rgba(0, 0, 0, 0.06);
+    --btn-secondary: #c8d4e0;
+    --btn-secondary-hover: #b0c0d0;
+    --snake-head: #2ebd85;
+    --snake-body: #1fa070;
+    --snake-body-alt: #188a60;
+}
+
+/* ===== Reset & Base ===== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background var(--transition), color var(--transition);
+    padding: 16px;
+    margin: 0;
+}
+
+/* ===== Game Container ===== */
+.game-container {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 24px 28px 28px 28px;
+    max-width: 720px;
+    width: 100%;
+    box-shadow: 0 16px 48px var(--shadow-color);
+    transition: background var(--transition), box-shadow var(--transition);
+    position: relative;
+}
+
+/* ===== Header ===== */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-accent);
+}
+.logo span {
+    font-size: 1.8rem;
+}
+
+.score-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+}
+.score-group .score-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.score-group .score-item .label {
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+.score-group .score-item .value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    min-width: 24px;
+    text-align: center;
+}
+.score-group .score-item .value.high {
+    color: var(--text-accent);
+}
+
+.diff-badge {
+    background: var(--btn-secondary);
+    padding: 2px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    transition: background var(--transition), color var(--transition);
+}
+
+/* ===== Board Wrapper ===== */
+.board-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.3);
+    transition: background var(--transition);
+    border: 2px solid var(--border-color);
+    touch-action: none;
+}
+
+#gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-card);
+    transition: background var(--transition);
+    image-rendering: pixelated;
+    touch-action: none;
+}
+
+/* ===== Overlay (Start / Pause / Game Over) ===== */
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-modal);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.96);
+    z-index: 10;
+}
+.overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+.overlay h2 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+.overlay .subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 16px;
+}
+.overlay .final-score {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-accent);
+    margin-bottom: 4px;
+}
+.overlay .high-score-display {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+/* Difficulty Selector */
+.diff-selector {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0 18px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.diff-selector button {
+    padding: 6px 18px;
+    border-radius: 20px;
+    border: 2px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: var(--font);
+}
+.diff-selector button:hover {
+    border-color: var(--text-accent);
+    color: var(--text-primary);
+}
+.diff-selector button.active {
+    border-color: var(--text-accent);
+    background: var(--text-accent);
+    color: var(--bg-primary);
+}
+
+/* ===== Controls ===== */
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-family: var(--font);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    background: var(--btn-secondary);
+    color: var(--text-primary);
+    min-height: 38px;
+    min-width: 44px;
+    touch-action: manipulation;
+    user-select: none;
+}
+.btn:hover {
+    background: var(--btn-secondary-hover);
+    transform: translateY(-1px);
+}
+.btn:active {
+    transform: translateY(1px);
+}
+.btn:focus-visible {
+    outline: 2px solid var(--text-accent);
+    outline-offset: 2px;
+}
+
+.btn-primary {
+    background: var(--btn-primary);
+    color: var(--bg-primary);
+}
+.btn-primary:hover {
+    background: var(--btn-primary-hover);
+    color: var(--bg-primary);
+}
+
+.btn-danger {
+    background: var(--btn-danger);
+    color: #fff;
+}
+.btn-danger:hover {
+    background: var(--btn-danger-hover);
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 8px 12px;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ===== Mobile Touch Controls ===== */
+.touch-controls {
+    display: none;
+    grid-template-columns: repeat(3, 64px);
+    grid-template-rows: repeat(3, 64px);
+    gap: 6px;
+    justify-content: center;
+    margin-top: 14px;
+    touch-action: none;
+}
+.touch-controls .touch-btn {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    transition: all 0.12s ease;
+    box-shadow: 0 4px 0 var(--border-color);
+    -webkit-tap-highlight-color: transparent;
+}
+.touch-controls .touch-btn:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+.touch-controls .touch-btn.up {
+    grid-column: 2;
+    grid-row: 1;
+}
+.touch-controls .touch-btn.left {
+    grid-column: 1;
+    grid-row: 2;
+}
+.touch-controls .touch-btn.down {
+    grid-column: 2;
+    grid-row: 3;
+}
+.touch-controls .touch-btn.right {
+    grid-column: 3;
+    grid-row: 2;
+}
+.touch-controls .touch-btn.blank {
+    visibility: hidden;
+}
+
+/* ===== Countdown ===== */
+.countdown {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-modal);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: var(--radius);
+    z-index: 15;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.countdown.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.countdown .number {
+    font-size: 8rem;
+    font-weight: 900;
+    color: var(--text-accent);
+    animation: countPop 0.6s ease;
+    text-shadow: 0 0 60px rgba(100, 240, 176, 0.3);
+}
+.countdown .label {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-top: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+@keyframes countPop {
+    0% {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+    .game-container {
+        padding: 16px;
+        border-radius: 8px;
+    }
+    .header {
+        gap: 6px 10px;
+    }
+    .logo {
+        font-size: 1.1rem;
+    }
+    .logo span {
+        font-size: 1.4rem;
+    }
+    .score-group {
+        font-size: 0.8rem;
+        gap: 10px;
+    }
+    .score-group .score-item .value {
+        font-size: 0.95rem;
+        min-width: 18px;
+    }
+    .controls {
+        gap: 8px;
+    }
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+        min-height: 34px;
+        min-width: 38px;
+    }
+    .btn-icon {
+        font-size: 1rem;
+        padding: 6px 10px;
+    }
+    .overlay h2 {
+        font-size: 1.8rem;
+    }
+    .overlay .final-score {
+        font-size: 1.4rem;
+    }
+    .diff-selector button {
+        padding: 4px 12px;
+        font-size: 0.75rem;
+    }
+    .touch-controls {
+        display: grid !important;
+        grid-template-columns: repeat(3, 56px);
+        grid-template-rows: repeat(3, 56px);
+        gap: 5px;
+    }
+    .touch-controls .touch-btn {
+        font-size: 1.4rem;
+        border-radius: 10px;
+    }
+    .countdown .number {
+        font-size: 5rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .game-container {
+        padding: 10px;
+    }
+    .touch-controls {
+        grid-template-columns: repeat(3, 48px);
+        grid-template-rows: repeat(3, 48px);
+        gap: 4px;
+    }
+    .touch-controls .touch-btn {
+        font-size: 1.2rem;
+        border-radius: 8px;
+    }
+    .logo {
+        font-size: 0.95rem;
+    }
+    .score-group {
+        font-size: 0.7rem;
+        gap: 6px;
+    }
+}
+
+@media (pointer: coarse) {
+    .touch-controls {
+        display: grid !important;
+    }
+}
+
+@media (pointer: fine) {
+    .touch-controls {
+        display: none !important;
+    }
+}
+
+/* ===== Utilities ===== */
+.hidden {
+    display: none !important;
+}
+.gap-4 {
+    gap: 4px;
+}
+.mt-4 {
+    margin-top: 4px;
+}
+.mt-8 {
+    margin-top: 8px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
