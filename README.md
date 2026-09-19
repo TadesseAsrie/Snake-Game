@@ -57,4 +57,4 @@ A modern and responsive Snake Game built using HTML, CSS, and Vanilla JavaScript
 
 No external frameworks or libraries are required.
 
-
+if like the project gives star 
